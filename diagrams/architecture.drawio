@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="draw.io" modified="2026-09-30T00:00:00.000Z" agent="MiMo 2.5 Pro" version="22.0.0" type="device">
+  <diagram id="c4-context" name="C4 Context">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;C4 System Context — Flower Farm Drone CV System&lt;/b&gt;" style="text;html=1;fontSize=18;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="800" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Farm Manager -->
+        <mxCell id="farmer" value="&lt;b&gt;Farm Manager&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Monitors flower health,&lt;br/&gt;reviews reports, takes&lt;br/&gt;action on disease hotspots&lt;/font/&gt;" style="shape=mxgraph.c4.person;fillColor=#08427B;fontColor=#fff;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="120" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Drone Operator -->
+        <mxCell id="pilot" value="&lt;b&gt;Drone Operator&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Deploys drone fleet,&lt;br/&gt;handles takeoff/landing,&lt;br/&gt;monitors battery&lt;/font/&gt;" style="shape=mxgraph.c4.person;fillColor=#08427B;fontColor=#fff;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="550" width="120" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- CV System (central) -->
+        <mxCell id="system" value="&lt;b&gt;Flower Farm CV System&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Distributed computer vision system&lt;br/&gt;that detects flowers, assesses health,&lt;br/&gt;and generates farm-wide reports&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#1168BD;fontColor=#fff;strokeColor=#0B4A82;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="300" width="360" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- Drone Fleet -->
+        <mxCell id="drones" value="&lt;b&gt;Drone Fleet&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Physical drones with&lt;br/&gt;cameras flying lawnmower&lt;br/&gt;patterns over the farm&lt;/font/&gt;" style="shape=mxgraph.c4.component;fillColor=#85BBF0;fontColor=#000;strokeColor=#6D9DC5;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="300" width="200" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Ray Cluster -->
+        <mxCell id="ray_cluster" value="&lt;b&gt;Ray Cluster&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Distributed compute cluster&lt;br/&gt;for parallel drone processing&lt;/font/&gt;" style="shape=mxgraph.c4.component;fillColor=#85BBF0;fontColor=#000;strokeColor=#6D9DC5;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="450" width="200" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Object Storage -->
+        <mxCell id="storage" value="&lt;b&gt;Object Storage&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Annotated frames, reports,&lt;br/&gt;model weights (S3/GCS/local)&lt;/font/&gt;" style="shape=mxgraph.c4.database;fillColor=#85BBF0;fontColor=#000;strokeColor=#6D9DC5;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="600" width="200" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="r1" value="Views reports,&lt;br/&gt;configures farm" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="farmer" target="system">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" value="Launches scan,&lt;br/&gt;monitors drones" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="pilot" target="system">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" value="Camera feed,&lt;br/&gt;flight commands" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="system" target="drones">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" value="Spawns actors" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="system" target="ray_cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r5" value="Writes frames,&lt;br/&gt;JSON reports" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="system" target="storage">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="c4-container" name="C4 Container">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;C4 Container Diagram — Flower Farm Drone CV System&lt;/b&gt;" style="text;html=1;fontSize=18;align=center;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="900" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- System boundary -->
+        <mxCell id="boundary" value="&lt;b&gt;Flower Farm CV System&lt;/b&gt;" style="container=1;collapsible=0;fillColor=none;strokeColor=#0B4A82;dashed=1;rounded=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="200" y="100" width="1200" height="750" as="geometry"/>
+        </mxCell>
+
+        <!-- CLI -->
+        <mxCell id="cli" value="&lt;b&gt;CLI (main.py)&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python, argparse&lt;br/&gt;Entry point — parses args,&lt;br/&gt;launches coordinator&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="250" y="160" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Coordinator -->
+        <mxCell id="coordinator" value="&lt;b&gt;Distributed Coordinator&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python, Ray&lt;br/&gt;Partitions farm, spawns workers,&lt;br/&gt;aggregates results, generates reports&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="250" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Drone Agents -->
+        <mxCell id="drone_agents" value="&lt;b&gt;Drone Agent x N&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python, OpenCV&lt;br/&gt;Scan path, capture frames,&lt;br/&gt;run detection, report findings&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="160" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Detector -->
+        <mxCell id="detector" value="&lt;b&gt;Flower Detector&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python, PyTorch, YOLOv8&lt;br/&gt;CNN + YOLOv8 detection,&lt;br/&gt;health assessment via HSV&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="250" y="380" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Image Utils -->
+        <mxCell id="image_utils" value="&lt;b&gt;Image Utils&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python, OpenCV&lt;br/&gt;Stabilization, CLAHE&lt;br/&gt;enhancement, overlays&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="380" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Config -->
+        <mxCell id="config" value="&lt;b&gt;Farm Config&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Python dataclasses&lt;br/&gt;Farm layout, drone params,&lt;br/&gt;detection thresholds&lt;/font/&gt;" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="380" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Output -->
+        <mxCell id="output" value="&lt;b&gt;Output Directory&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Filesystem&lt;br/&gt;Annotated frames (JPEG),&lt;br/&gt;farm report (JSON)&lt;/font/&gt;" style="shape=mxgraph.c4.database;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="600" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- External: Drone Fleet -->
+        <mxCell id="drones_ext" value="&lt;b&gt;Drone Fleet&lt;/b&gt;&lt;br/&gt;&lt;font color=&quot;#666&quot;&gt;Physical drones&lt;br/&gt;with cameras&lt;/font/&gt;" style="shape=mxgraph.c4.component;fillColor=#999;fontColor=#fff;strokeColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="600" width="120" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="r1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cli" target="coordinator">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="coordinator" target="drone_agents">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="drone_agents" target="detector">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="drone_agents" target="image_utils">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="drone_agents" target="config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="drone_agents" target="output">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="coordinator" target="output">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r8" value="RTSP/UDP" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" parent="1" source="drones_ext" target="drone_agents">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="deployment" name="Deployment">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="title" value="&lt;b&gt;Deployment — Multi-Node Ray Cluster&lt;/b&gt;" style="text;html=1;fontSize=18;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="800" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Operator Laptop -->
+        <mxCell id="laptop" value="&lt;b&gt;Operator Laptop&lt;/b&gt;&lt;br/&gt;macOS / Linux" style="shape=mxgraph.c4.node;fillColor=#1168BD;fontColor=#fff;strokeColor=#0B4A82;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="250" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="cli_deploy" value="&lt;b&gt;CLI&lt;/b&gt;&lt;br/&gt;main.py" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="90" y="130" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Head Node -->
+        <mxCell id="head" value="&lt;b&gt;Head Node&lt;/b&gt;&lt;br/&gt;Ubuntu 22.04, 8 cores, 16GB RAM" style="shape=mxgraph.c4.node;fillColor=#1168BD;fontColor=#fff;strokeColor=#0B4A82;" vertex="1" parent="1">
+          <mxGeometry x="400" y="100" width="400" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="coord_deploy" value="&lt;b&gt;Coordinator&lt;/b&gt;&lt;br/&gt;Ray driver" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="420" y="140" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="ray_head_deploy" value="&lt;b&gt;Ray Head&lt;/b&gt;&lt;br/&gt;GCS + Dashboard" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="610" y="140" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="d0" value="&lt;b&gt;Drone 0&lt;/b&gt;&lt;br/&gt;Zone A, 1 CPU" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="420" y="240" width="170" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="d1" value="&lt;b&gt;Drone 1&lt;/b&gt;&lt;br/&gt;Zone B, 1 CPU" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="610" y="240" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Worker 1 -->
+        <mxCell id="worker1" value="&lt;b&gt;Worker Node 1&lt;/b&gt;&lt;br/&gt;Ubuntu, 4 cores, 8GB RAM" style="shape=mxgraph.c4.node;fillColor=#1168BD;fontColor=#fff;strokeColor=#0B4A82;" vertex="1" parent="1">
+          <mxGeometry x="900" y="100" width="250" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="d2" value="&lt;b&gt;Drone 2&lt;/b&gt;&lt;br/&gt;Zone C, 1 CPU" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="930" y="140" width="190" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Worker 2 -->
+        <mxCell id="worker2" value="&lt;b&gt;Worker Node 2&lt;/b&gt;&lt;br/&gt;NVIDIA Jetson Nano" style="shape=mxgraph.c4.node;fillColor=#1168BD;fontColor=#fff;strokeColor=#0B4A82;" vertex="1" parent="1">
+          <mxGeometry x="900" y="350" width="250" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="d3" value="&lt;b&gt;Drone 3&lt;/b&gt;&lt;br/&gt;Zone D, 1 CPU + GPU" style="shape=mxgraph.c4.container;fillColor=#438DD5;fontColor=#fff;strokeColor=#2D6DA4;" vertex="1" parent="1">
+          <mxGeometry x="930" y="390" width="190" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="r1" value="Launches" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cli_deploy" target="coord_deploy">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" value="Spawns actors" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="coord_deploy" target="d0">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" value="Schedules" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="ray_head_deploy" target="d2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" value="Schedules" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="ray_head_deploy" target="d3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

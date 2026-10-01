@@ -10,7 +10,7 @@
 
 - [What Is This?](#what-is-this)
 - [The Problem We're Solving](#the-problem-were-solving)
-- [Architecture Deep Dive](#architecture-deep-dive)
+- [Architecture Deep Dive](#architecture-deep-dive) — C4, Mermaid, sequence, state, class diagrams
 - [Algorithm Breakdown](#algorithm-breakdown)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
@@ -55,42 +55,274 @@ This system flips the model: autonomous drones scan continuously, detection is d
 
 ## Architecture Deep Dive
 
+> Full design diagrams: [`diagrams/architecture.drawio`](diagrams/architecture.drawio) (open in draw.io) and [`diagrams/README.md`](diagrams/README.md) (all Mermaid + C4 sources).
+
+### C4 System Context (Level 1)
+
+Who uses the system and what does it interact with?
+
+```mermaid
+C4Context
+    title System Context — Flower Farm Drone CV System
+
+    Person(farmer, "Farm Manager", "Monitors flower health, reviews reports")
+    Person(pilot, "Drone Operator", "Deploys and manages drone fleet")
+
+    System(cv_system, "Flower Farm CV System", "Distributed CV for flower detection, health assessment, and farm reporting")
+
+    System_Ext(drones, "Drone Fleet", "Physical drones with cameras")
+    System_Ext(ray_cluster, "Ray Cluster", "Distributed compute for parallel processing")
+    System_Ext(storage, "Object Storage", "Frames, reports, model weights")
+
+    Rel(farmer, cv_system, "Views reports")
+    Rel(pilot, cv_system, "Launches scans")
+    Rel(cv_system, drones, "Camera feed + commands")
+    Rel(cv_system, ray_cluster, "Spawns actors")
+    Rel(cv_system, storage, "Writes outputs")
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    COORDINATOR PROCESS                       │
-│                                                             │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐│
-│  │ Farm        │  │ Zone         │  │ Result              ││
-│  │ Partitioner │→ │ Assigner     │→ │ Aggregator          ││
-│  │ (grid calc) │  │ (1 drone/zone│  │ (merge + hotspots)  ││
-│  └─────────────┘  └──────────────┘  └─────────────────────┘│
-│         │                │                    ↑             │
-│         ▼                ▼                    │             │
-│  ┌─────────────────────────────────────────────┐            │
-│  │            RAY CLUSTER LAYER                │            │
-│  │  ray.get() ← futures[] ← ray.remote()      │            │
-│  └──────┬───────────┬───────────┬──────────────┘            │
-└─────────┼───────────┼───────────┼───────────────────────────┘
-          │           │           │
-    ┌─────┴─────┐┌────┴─────┐┌───┴──────┐
-    │ DRONE 0   ││ DRONE 1  ││ DRONE 2  │   Ray Actors
-    │ (Zone A)  ││ (Zone B) ││ (Zone C) │   (parallel processes)
-    └─────┬─────┘└────┬─────┘└───┬──────┘
-          │           │           │
-    ┌─────┴─────────────────────────────┐
-    │       DETECTION PIPELINE          │
-    │                                   │
-    │  capture ──→ stabilize ──→ enhance│
-    │       │                           │
-    │       ▼                           │
-    │  detect (YOLOv8 / CNN fallback)   │
-    │       │                           │
-    │       ▼                           │
-    │  health assess (HSV analysis)     │
-    │       │                           │
-    │       ▼                           │
-    │  annotate + report                │
-    └───────────────────────────────────┘
+
+### C4 Container (Level 2)
+
+What are the major running parts?
+
+```mermaid
+C4Container
+    title Container — Flower Farm CV System
+
+    Person(farmer, "Farm Manager", "")
+    Person(pilot, "Drone Operator", "")
+
+    System_Boundary(system, "Flower Farm CV System") {
+        Container(cli, "CLI (main.py)", "Python", "Entry point, arg parsing")
+        Container(coordinator, "Distributed Coordinator", "Python, Ray", "Farm partitioning, actor spawning, result aggregation")
+        Container(drone_agent, "Drone Agent x N", "Python, OpenCV", "Scan path, frame capture, detection loop")
+        Container(detector, "Flower Detector", "PyTorch, YOLOv8", "Detection engine + health assessment")
+        Container(image_utils, "Image Utils", "OpenCV", "Stabilization, CLAHE, overlays")
+        Container(config, "Farm Config", "dataclasses", "Typed configuration")
+        ContainerDb(output, "Output", "Filesystem", "JPEG frames, JSON report")
+    }
+
+    Rel(pilot, cli, "CLI flags")
+    Rel(cli, coordinator, "FarmConfig")
+    Rel(coordinator, drone_agent, "One per zone")
+    Rel(drone_agent, detector, "Frames")
+    Rel(drone_agent, image_utils, "Preprocessing")
+    Rel(drone_agent, output, "Annotated frames")
+    Rel(coordinator, output, "farm_report.json")
+```
+
+### C4 Component (Level 3) — Detection Pipeline
+
+How does detection work internally?
+
+```mermaid
+C4Component
+    title Component — Drone Agent Detection Pipeline
+
+    Container_Boundary(agent, "Drone Agent") {
+        Component(capture, "Frame Capture", "cv2 / simulation", "RTSP stream or synthetic")
+        Component(stabilize, "Frame Stabilizer", "Lucas-Kanade", "Optical flow → affine warp")
+        Component(enhance, "CLAHE Enhancer", "LAB color space", "Adaptive histogram equalization")
+        Component(yolo, "YOLOv8 Detector", "CSPDarknet + PANet", "Object detection")
+        Component(cnn, "CNN Fallback", "MobileNet-style", "HSV contour + classification")
+        Component(health, "Health Assessor", "HSV analysis", "Color distribution → status")
+        Component(annotate, "Overlay Annotator", "cv2", "BBoxes + labels + colors")
+    }
+
+    Rel(capture, stabilize, "Raw frame")
+    Rel(stabilize, enhance, "Stabilized")
+    Rel(enhance, yolo, "Enhanced")
+    enhance-->cnn: "fallback"
+    Rel(yolo, health, "Patches")
+    Rel(cnn, health, "Patches")
+    Rel(health, annotate, "Health status")
+```
+
+### Runtime Sequence
+
+What happens during a farm scan?
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Pilot as Operator
+    participant CLI as main.py
+    participant Coord as Coordinator
+    participant Ray as Ray Cluster
+    participant D0 as Drone 0
+    participant D1 as Drone 1
+    participant Det as Detector
+    participant Out as Output
+
+    Pilot->>CLI: python main.py --distributed --drones 4
+    CLI->>Coord: new DistributedCoordinator(config)
+    Coord->>Coord: partition_farm() → 4 zones
+
+    par Spawn Ray Actors
+        Coord->>Ray: drone_0.remote(zone_0)
+        Coord->>Ray: drone_1.remote(zone_1)
+        Coord->>Ray: drone_2.remote(zone_2)
+        Coord->>Ray: drone_3.remote(zone_3)
+    end
+
+    par Parallel Missions
+        Ray->>D0: run()
+        Ray->>D1: run()
+        loop Each waypoint
+            D0->>D0: capture → stabilize → enhance
+            D0->>Det: detect(frame)
+            Det-->>D0: detections[]
+            D0->>Out: write annotated frame
+        end
+    end
+
+    D0-->>Coord: results
+    D1-->>Coord: results
+    Coord->>Coord: aggregate + find hotspots
+    Coord->>Out: farm_report.json
+    Coord-->>Pilot: console report
+```
+
+### Data Flow
+
+How does data move through the system?
+
+```mermaid
+flowchart TD
+    subgraph Input
+        CAMERA["Camera Feed<br/>(RTSP/UDP)"]
+        GPS["GPS Module"]
+        CONFIG["Farm Config"]
+    end
+
+    subgraph Pipeline
+        CAPTURE["Capture 640x480"]
+        STAB["Stabilize<br/>(optical flow)"]
+        ENH["Enhance<br/>(CLAHE)"]
+        DET{"YOLOv8<br/>available?"}
+        YOLO["YOLOv8-nano"]
+        CNN["CNN + HSV<br/>contours"]
+        HEALTH["Health Assess<br/>(HSV analysis)"]
+        ANNO["Annotate<br/>(bboxes + labels)"]
+    end
+
+    subgraph Distributed
+        COORD["Coordinator"]
+        RAY["Ray Actors x N"]
+    end
+
+    subgraph Output
+        FRAMES["Annotated Frames<br/>(JPEG)"]
+        REPORT["farm_report.json"]
+    end
+
+    CONFIG --> COORD --> RAY --> CAPTURE
+    CAMERA --> CAPTURE
+    GPS --> CAPTURE
+    CAPTURE --> STAB --> ENH --> DET
+    DET -->|yes| YOLO --> HEALTH
+    DET -->|no| CNN --> HEALTH
+    HEALTH --> ANNO --> FRAMES
+    RAY -->|aggregate| COORD --> REPORT
+
+    style DET fill:#f9f,stroke:#333,stroke-width:2px
+    style COORD fill:#bbf,stroke:#333
+    style RAY fill:#bfb,stroke:#333
+```
+
+### Drone Lifecycle (State Machine)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Planning: Mission assigned
+    Planning --> Scanning: Path generated
+
+    state Scanning {
+        Capturing --> Stabilizing
+        Stabilizing --> Enhancing
+        Enhancing --> Detecting
+        Detecting --> AssessingHealth
+        AssessingHealth --> Annotating
+        Annotating --> Capturing: next waypoint
+    }
+
+    Scanning --> Complete: all waypoints done
+    Scanning --> LowBattery: battery < 10%
+    LowBattery --> [*]
+    Complete --> [*]
+```
+
+### Class Diagram
+
+Core data structures and relationships.
+
+```mermaid
+classDiagram
+    class FarmConfig {
+        +str farm_name
+        +float farm_width_m
+        +float farm_length_m
+        +int num_drones
+        +float overlap_percent
+        +int grid_rows, grid_cols
+        +str model_path, output_dir
+        +bool distributed
+    }
+
+    class DroneConfig {
+        +int drone_id
+        +float speed_mps, altitude_m
+        +float camera_fov_deg
+        +tuple image_size
+        +float model_confidence_threshold
+    }
+
+    class FarmZone {
+        +int zone_id
+        +float x_min, x_max, y_min, y_max
+        +int drone_id
+    }
+
+    class DetectionResult {
+        +FlowerType flower_type
+        +HealthStatus health
+        +float confidence
+        +tuple bbox, gps_coords
+        +float area_cm2
+    }
+
+    class FlowerType { <<enum>> ROSE, SUNFLOWER, TULIP, LAVENDER, DAISY }
+    class HealthStatus { <<enum>> HEALTHY, WILTING, DISEASED, DAMAGED }
+
+    class DroneAgent {
+        +run_mission() list
+        +get_summary() dict
+        -_plan_scan_path()
+        -_capture_frame()
+    }
+
+    class FlowerDetector {
+        +detect() list~DetectionResult~
+        -_detect_yolo()
+        -_detect_cnn()
+    }
+
+    class DistributedCoordinator {
+        +run_distributed() dict
+        +run_local() dict
+        +print_report()
+        -_aggregate_results()
+    }
+
+    FarmConfig "1" --> "*" FarmZone : partition_farm()
+    FarmZone "1" -- "1" DroneConfig : assigned
+    DroneAgent --> DroneConfig
+    DroneAgent --> FarmZone
+    DroneAgent --> FlowerDetector
+    DetectionResult --> FlowerType
+    DetectionResult --> HealthStatus
+    DistributedCoordinator "1" --> "*" DroneAgent : spawns via Ray
 ```
 
 ### Why Ray?
